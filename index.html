@@ -727,7 +727,7 @@
                                     if (existingSection) {
                                         let productUpdated = false;
                                         let familyUpdated = false;
-                                        let caspianFound = false;
+                                        let caspianUpdated = false;
 
                                         let newSectionContent = existingSection.map(line => {
                                             if (line.startsWith('Product=')) {
@@ -738,31 +738,21 @@
                                                 familyUpdated = true;
                                                 return familyLine;
                                             }
-                                            if (line.startsWith('CaspianVTL=')) {
-                                                caspianFound = true;
-                                                // If new family needs it, update it. If not, remove it (return null).
-                                                if (['WATT_DARWIN', 'WATT', 'NESTAS_RAND_MID'].includes(familySelect.value)) {
-                                                    return `CaspianVTL=${vtlData.dataFileName}`;
-                                                } else {
-                                                    return null; // This will be filtered out later.
-                                                }
+                                            if (line.startsWith('CaspianVTL=') && ['WATT_DARWIN', 'WATT', 'NESTAS_RAND_MID'].includes(familySelect.value)) {
+                                                caspianUpdated = true;
+                                                return `CaspianVTL=${vtlData.dataFileName}`;
                                             }
                                             return line;
                                         });
 
                                         // Add lines that might be missing
-                                        if (!productUpdated) {
-                                            newSectionContent.push(productLine);
-                                        }
-                                        if (!familyUpdated) {
-                                            newSectionContent.push(familyLine);
-                                        }
-                                        if (['WATT_DARWIN', 'WATT', 'NESTAS_RAND_MID'].includes(familySelect.value) && !caspianFound) {
+                                        if (!productUpdated) newSectionContent.push(productLine);
+                                        if (!familyUpdated) newSectionContent.push(familyLine);
+                                        if (['WATT_DARWIN', 'WATT', 'NESTAS_RAND_MID'].includes(familySelect.value) && !caspianUpdated) {
                                             newSectionContent.push(`CaspianVTL=${vtlData.dataFileName}`);
                                         }
 
-                                        // Filter out removed lines and update the section
-                                        iniSections[recipeSection] = newSectionContent.filter(line => line !== null);
+                                        iniSections[recipeSection] = newSectionContent;
                                     } else {
                                         // If the section exists in [RECIPE] but not as its own section, create it
                                         iniSections[recipeSection] = sectionContent;
