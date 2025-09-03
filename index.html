@@ -848,7 +848,6 @@
                 }
 
                 const summaryType = document.querySelector('input[name="summaryType"]:checked').value;
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
                 let content = `INI Generation Summary - ${summaryType.toUpperCase()}\n`;
                 content += `Generated on: ${new Date().toLocaleString()}\n`;
@@ -870,25 +869,37 @@
                     content += processingLog.join('\n');
                 }
 
+                const acumenTemplate = vtlData && vtlData.dataFileName ? vtlData.dataFileName : 'NoTemplate';
                 const blob = new Blob([content], { type: 'text/plain' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `ini-generation-summary-${summaryType}-${timestamp}.txt`;
+                a.download = `Summary ${acumenTemplate}-${getFormattedTimestamp()}.txt`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
             }
 
+            function getFormattedTimestamp() {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+                const year = String(now.getFullYear()).slice(-2);
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                return `${day}${month}${year}-${hours}${minutes}${seconds}`;
+            }
+
             function downloadINI() {
                 if (generatedINI) {
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                    const acumenTemplate = vtlData && vtlData.dataFileName ? vtlData.dataFileName : 'NoTemplate';
                     const blob = new Blob([generatedINI], { type: 'text/plain' });
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `generated-${timestamp}.ini`;
+                    a.download = `Generated ${acumenTemplate}-${getFormattedTimestamp()}.ini`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
